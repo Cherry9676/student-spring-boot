@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h2>Student Management System</h2>
+
+    <!-- Form to add student -->
+    <form id="studentForm">
+        <input type="text" id="sname" placeholder="Enter Student Name" required>
+        <input type="number" id="year" placeholder="Enter Year" required>
+        <input type="text" id="branch" placeholder="Enter Branch" required>
+        <input type="text" id="phoneNumber" placeholder="Enter Phone Number" required>
+        <input type="date" id="dateOfJoining" required>
+        <button type="submit">Add Student</button>
+    </form>
+
+    <h3>Student List</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Year</th>
+                <th>Branch</th>
+                <th>Phone Number</th>
+                <th>Date of Joining</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="studentTableBody"></tbody>
+    </table>
+
+    <script>
+        // Function to fetch students
+        function fetchStudents() {
+            axios.get('/students')
+                .then(response => {
+                    const students = response.data;
+                    const tableBody = document.getElementById('studentTableBody');
+                    tableBody.innerHTML = '';
+
+                    students.forEach(student => {
+                        tableBody.innerHTML += `
+                            <tr>
+                                <td>${student.rollNO}</td>
+                                <td>${student.sname}</td>
+                                <td>${student.year}</td>
+                                <td>${student.branch}</td>
+                                <td>${student.phoneNumber}</td>
+                                <td>${student.dateOfJoining}</td>
+                                <td>
+                                    <button onclick="deleteStudent(${student.rollNO})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(error => console.error("Error fetching students:", error));
+        }
+
+        // Function to add a student
+        document.getElementById("studentForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const studentData = {
+                sname: document.getElementById("sname").value,
+                year: document.getElementById("year").value,
+                branch: document.getElementById("branch").value,
+                phoneNumber: document.getElementById("phoneNumber").value,
+                dateOfJoining: document.getElementById("dateOfJoining").value
+            };
+
+            axios.post('/students', studentData)
+                .then(response => {
+                    alert("Student added successfully!");
+                    fetchStudents();
+                    document.getElementById("studentForm").reset();
+                })
+                .catch(error => console.error("Error adding student:", error));
+        });
+
+        // Function to delete a student
+        function deleteStudent(id) {
+            axios.delete(`/students/${id}`)
+                .then(() => {
+                    alert("Student deleted successfully!");
+                    fetchStudents();
+                })
+                .catch(error => console.error("Error deleting student:", error));
+        }
+
+        // Load students when the page loads
+        fetchStudents();
+    </script>
+</body>
+</html>
